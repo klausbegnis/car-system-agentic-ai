@@ -50,6 +50,68 @@ class AgenticNode(Node):
         self, state: StateGraph, config: RunnableConfig, *args, **kwargs
     ) -> Command:
         """
-        Execute the node.
+        Execute the agentic node to analyze car problems.
         """
-        pass
+        from langchain_core.messages import HumanMessage
+
+        # Get the last human message from state
+        messages = state.get("messages", [])
+        if not messages:
+            return Command(
+                update={
+                    "error_message": "No messages found in state.",
+                },
+                next_node=self.routing_options.get("end", "END"),
+            )
+
+        # Find the last human message
+        last_human_message = None
+        for msg in reversed(messages):
+            if isinstance(msg, HumanMessage):
+                last_human_message = msg
+                break
+
+        if not last_human_message:
+            return Command(
+                update={
+                    "error_message": "No human message found in conversation.",
+                },
+                next_node=self.routing_options.get("end", "END"),
+            )
+
+        try:
+            # Use the model with its prompt to analyze the car problem
+            response = self.model.invoke(messages=[last_human_message])
+
+            # Extract the analysis content
+            analysis_content = ""
+            if hasattr(response, "content"):
+                analysis_content = response.content
+            elif isinstance(response, dict) and "content" in response:
+                analysis_content = response["content"]
+            else:
+                analysis_content = str(response)
+
+            # Return successful command with analysis
+            return Command(
+                update={
+                    "analysis_result": {
+                        "input": last_human_message.content,
+                        "analysis": analysis_content,
+                        "node": self.name,
+                    },
+                    "recommendations": [analysis_content],  # Simple rec
+                    "processing_status": "analysis_completed",
+                    "error_message": None,
+                },
+                next_node=self.routing_options.get("next_node", "END"),
+            )
+
+        except Exception as e:
+            # Return error command
+            return Command(
+                update={
+                    "error_message": f"Error in agentic analysis: {e!s}",
+                },
+                next_node=self.routing_options.get("end", "END"),
+            )

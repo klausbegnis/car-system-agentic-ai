@@ -10,7 +10,7 @@ Copyright (c) 2025 Doutorie. All rights reserved.
 from collections.abc import Iterator
 from typing import Any, Optional
 
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from src.models.base._chat_model import ChatModel
@@ -50,7 +50,13 @@ class Gemini(ChatModel):
             BaseMessage: The response from the gemini chat model.
         """
         if messages:
-            return self.model.invoke(messages)
+            # Add system prompt to messages if it exists
+            if self.prompt:
+                prompt_message = SystemMessage(content=self.prompt)
+                full_messages = [prompt_message, *messages]
+            else:
+                full_messages = messages
+            return self.model.invoke(full_messages)
         raise ValueError("Messages are required")
 
     def stream(
@@ -70,5 +76,12 @@ class Gemini(ChatModel):
             Iterator[Any]: The response from the gemini chat model.
         """
         if messages:
-            return self.model.stream(messages)
+            # Add system prompt to messages if it exists
+            if self.prompt:
+                from langchain_core.messages import SystemMessage
+                prompt_message = SystemMessage(content=self.prompt)
+                full_messages = [prompt_message, *messages]
+            else:
+                full_messages = messages
+            return self.model.stream(full_messages)
         raise ValueError("Messages are required")

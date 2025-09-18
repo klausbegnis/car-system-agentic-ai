@@ -19,7 +19,9 @@ class Node:
     Base class for all nodes in the graph.
     """
 
-    def __init__(self, name: str, description: str, routing_options: list[str]):
+    def __init__(
+        self, name: str, description: str, routing_options: dict[str, str]
+    ):
         self.name = name
         self.description = description
         self.routing_options = routing_options
