@@ -1,15 +1,18 @@
-"""Prompt utilities for loading and con    # Read and return the content
-try:
-    with open(prompt_file, encoding='utf-8') as file:
-        content = file.read().strip()
-        return content
-except Exception as e:
-    raise RuntimeError(
-        f"Error reading prompt file {prompt_file}: {e}"
-    ) from e markdown prompts"""
+"""
+File: prompt_loader.py
+Project: Agentic AI example
+Created: Thursday, 18th September 2025
+Author: Klaus
+
+MIT License
+"""
 
 from pathlib import Path
 from typing import Optional
+
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 def load_prompt_from_markdown(
@@ -51,7 +54,9 @@ def load_prompt_from_markdown(
             content = file.read().strip()
             return content
     except Exception as e:
-        raise RuntimeError(f"Error reading prompt file {prompt_file}: {e}")
+        raise RuntimeError(
+            f"Error reading prompt file {prompt_file}: {e}"
+        ) from e
 
 
 def list_available_prompts(prompts_dir: Optional[str] = None) -> list[str]:
@@ -121,5 +126,5 @@ def get_prompt(prompt_name: str) -> str:
 
     if not validate_prompt_content(content):
         raise ValueError(f"Invalid or empty prompt content in {prompt_name}.md")
-
+    logger.info(f"🔍 PromptLoader: Loaded prompt {prompt_name}")
     return content

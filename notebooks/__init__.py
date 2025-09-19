@@ -1,10 +1,10 @@
 """
 File: __init__.py
-Project: doutor-ia
+Project: Agentic AI example
 Created: Thursday, 18th September 2025 4:50:42 pm
 Author: Klaus
 
-Copyright (c) 2025 Doutorie. All rights reserved.
+MIT License
 """
 
 import sys
@@ -34,11 +34,14 @@ import src
 # Create standardized namespaces
 models = src.models
 nodes = src.nodes
+schemas = src.schemas
 services = src.services
 utils = src.utils
 
 # Setup logging from src
-logger = utils.get_logger(__name__)
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 logger.info(f"🔑 Environment loaded from: {env_path}")
 api_key_status = "✅ Found" if os.getenv("GOOGLE_API_KEY") else "❌ Not found"
@@ -47,7 +50,8 @@ logger.info(f"🔑 GOOGLE_API_KEY: {api_key_status}")
 # Make everything available for "from notebooks import *"
 __all__ = [
     "models",
-    "nodes", 
+    "nodes",
+    "schemas",
     "services",
     "utils",
     "logger",

@@ -6,7 +6,9 @@ An intelligent car management system powered by AI agents.
 
 ## 📚 Documentation
 
-- [How to Run](docs/how-to-run.md) - Setup and running instructions with UV
+- [Installation Guide](docs/installation-guide.md) - Complete setup instructions with UV or pip
+- [Environment Variables](docs/environment-variables.md) - Configuration and API key setup
+- [Using Notebooks](docs/using-notebooks.md) - Guide for working with Jupyter notebooks
 
 ## 📝 License
 

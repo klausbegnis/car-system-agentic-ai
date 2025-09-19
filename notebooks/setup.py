@@ -1,10 +1,10 @@
 """
 File: setup.py
-Project: doutor-ia
+Project: Agentic AI example
 Created: Thursday, 18th September 2025 5:00:18 pm
 Author: Klaus
 
-Copyright (c) 2025 Doutorie. All rights reserved.
+MIT License
 """
 
 from pathlib import Path

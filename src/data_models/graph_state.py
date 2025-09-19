@@ -1,4 +1,11 @@
-"""State model for LangGraph"""
+"""
+File: graph_state.py
+Project: Agentic AI example
+Created: Thursday, 18th September 2025
+Author: Klaus
+
+MIT License
+"""
 
 from typing import Optional, TypedDict
 
@@ -10,23 +17,16 @@ class CarSystemState(TypedDict):
 
     # Messages to track conversation flow
     messages: list[BaseMessage]
-
     # User input and context
     user_input: Optional[str]
-
     # Car-related data
     car_data: Optional[dict]
-
     # Processing status
-    current_node: Optional[str]
     processing_status: Optional[str]
-
     # Results and outputs
     analysis_result: Optional[dict]
     recommendations: Optional[list[str]]
-
     # Error handling
     error_message: Optional[str]
-
     # Additional context that might be needed
     context: Optional[dict]

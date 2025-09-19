@@ -1,16 +1,17 @@
 """
 File: _chat_model.py
-Project: doutor-ia
+Project: Agentic AI example
 Created: Thursday, 18th September 2025 5:26:25 pm
 Author: Klaus
 
-Copyright (c) 2025 Doutorie. All rights reserved.
+MIT License
 """
 
 from abc import ABC, abstractmethod
 from typing import Optional
-from pydantic import BaseModel
+
 from langchain_core.messages import BaseMessage
+from pydantic import BaseModel
 
 
 class ChatModel(ABC):
@@ -44,4 +45,4 @@ class ChatModel(ABC):
         """
         Set the structured output schema.
         """
-        self.model.with_structured_output(schema, include_raw=True)
+        self.model = self.model.with_structured_output(schema, include_raw=True)

@@ -1,10 +1,10 @@
 """
 File: gemini.py
-Project: doutor-ia
+Project: Agentic AI example
 Created: Thursday, 18th September 2025 5:33:03 pm
 Author: Klaus
 
-Copyright (c) 2025 Doutorie. All rights reserved.
+MIT License
 """
 
 from collections.abc import Iterator
@@ -14,6 +14,9 @@ from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from src.models.base._chat_model import ChatModel
+from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class Gemini(ChatModel):
@@ -32,6 +35,7 @@ class Gemini(ChatModel):
         self.model = ChatGoogleGenerativeAI(
             model=model, temperature=temperature
         )
+        logger.info(f"🤖 GeminiModel: Initialized with model {model}")
 
     def invoke(
         self, messages: Optional[list[BaseMessage]] = None
@@ -56,7 +60,33 @@ class Gemini(ChatModel):
                 full_messages = [prompt_message, *messages]
             else:
                 full_messages = messages
-            return self.model.invoke(full_messages)
+            response = self.model.invoke(full_messages)
+
+            # Log token usage based on response type
+            try:
+                if isinstance(response, dict) and "raw" in response:
+                    # Structured output with include_raw=True
+                    raw_response = response.get("raw")
+                    if (
+                        hasattr(raw_response, "usage_metadata")
+                        and raw_response.usage_metadata
+                    ):
+                        logger.info(
+                            f"🪙 Token usage: {raw_response.usage_metadata}"
+                        )
+                elif isinstance(response, BaseMessage):
+                    # Direct AIMessage response
+                    if (
+                        hasattr(response, "usage_metadata")
+                        and response.usage_metadata
+                    ):
+                        logger.info(
+                            f"🪙 Token usage: {response.usage_metadata}"
+                        )
+            except Exception as e:
+                logger.debug(f"Could not log token usage: {e}")
+
+            return response
         raise ValueError("Messages are required")
 
     def stream(
@@ -79,6 +109,7 @@ class Gemini(ChatModel):
             # Add system prompt to messages if it exists
             if self.prompt:
                 from langchain_core.messages import SystemMessage
+
                 prompt_message = SystemMessage(content=self.prompt)
                 full_messages = [prompt_message, *messages]
             else:

@@ -1,22 +1,25 @@
 """
-File: agentic_node.py
-Project: doutor-ia
+File: reasoning_node.py
+Project: Agentic AI example
 Created: Thursday, 18th September 2025 5:23:35 pm
 Author: Klaus
 
-Copyright (c) 2025 Doutorie. All rights reserved.
+MIT License
 """
 
+from langchain_core.messages import HumanMessage
 from langchain_core.runnables import RunnableConfig
-from langgraph.graph import StateGraph
 from langgraph.types import Command
 
 from src.models.base._chat_model import ChatModel
+from src.utils.logger import get_logger
 
 from .base._node import Node
 
+logger = get_logger(__name__)
 
-class AgenticNode(Node):
+
+class ReasoningNode(Node):
     """
     Base class for all agentic nodes in the graph.
     """
@@ -45,23 +48,26 @@ class AgenticNode(Node):
         self.model = model
         self.tools = tools
         self.friendly_agents = []
+        logger.info("ReasoningNode: Initialized")
 
     def execute(
-        self, state: StateGraph, config: RunnableConfig, *args, **kwargs
+        self, state: dict, config: RunnableConfig, *args, **kwargs
     ) -> Command:
         """
         Execute the agentic node to analyze car problems.
         """
-        from langchain_core.messages import HumanMessage
+        logger.info("🧠 ReasoningNode: Starting execution")
 
         # Get the last human message from state
         messages = state.get("messages", [])
+
         if not messages:
+            logger.warning("❌ No messages found in state")
             return Command(
                 update={
                     "error_message": "No messages found in state.",
                 },
-                next_node=self.routing_options.get("end", "END"),
+                goto=self.routing_options.get("end", "END"),
             )
 
         # Find the last human message
@@ -72,14 +78,20 @@ class AgenticNode(Node):
                 break
 
         if not last_human_message:
+            logger.warning("❌ No human message found in conversation")
             return Command(
                 update={
                     "error_message": "No human message found in conversation.",
                 },
-                next_node=self.routing_options.get("end", "END"),
+                goto=self.routing_options.get("end", "END"),
             )
 
+        logger.info(
+            f"📨 Processing message: {last_human_message.content[:100]}..."
+        )
+
         try:
+            logger.info("🤖 Invoking model for analysis...")
             # Use the model with its prompt to analyze the car problem
             response = self.model.invoke(messages=[last_human_message])
 
@@ -91,6 +103,11 @@ class AgenticNode(Node):
                 analysis_content = response["content"]
             else:
                 analysis_content = str(response)
+
+            logger.info(
+                f"🚀 Routing to next_node: "
+                f"{self.routing_options.get('next_node')}"
+            )
 
             # Return successful command with analysis
             return Command(
@@ -104,14 +121,15 @@ class AgenticNode(Node):
                     "processing_status": "analysis_completed",
                     "error_message": None,
                 },
-                next_node=self.routing_options.get("next_node", "END"),
+                goto=self.routing_options.get("next_node", "END"),
             )
 
         except Exception as e:
+            logger.error(f"❌ Error in reasoning analysis: {e}")
             # Return error command
             return Command(
                 update={
                     "error_message": f"Error in agentic analysis: {e!s}",
                 },
-                next_node=self.routing_options.get("end", "END"),
+                goto=self.routing_options.get("end", "END"),
             )
