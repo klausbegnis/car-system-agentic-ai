@@ -1,0 +1,76 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": false,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.defaultInterpreterPath": "/change/to/your/interpreter/path",
+    "ruff.lint.enable": true,
+    "editor.formatOnSave": false,
+    "editor.formatOnType": true,
+    "editor.rulers": [
+        80
+    ],
+    "editor.wordWrap": "on",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
+    "autoDocstring.docstringFormat": "google",
+    "autoDocstring.startOnNewLine": true,
+    "files.associations": {
+        "*.py": "python",
+        ".env": "plaintext"
+    },
+    "git.autofetch": true,
+    "psi-header.config": {
+        "forceToTop": true,
+        "blankLinesAfter": 1
+    },
+    "psi-header.changes-tracking": {
+        "isActive": false,
+        "enforceHeader": true,
+        "include": [
+            "python"
+        ],
+        "exclude": [
+            "json",
+            "jsonc",
+            "markdown"
+        ]
+    },
+    "psi-header.lang-config": [
+        {
+            "language": "python",
+            "begin": "\"\"\"",
+            "end": "\"\"\""
+        }
+    ],
+    "psi-header.variables": [
+        [
+            "author",
+            "Klaus"
+        ],
+        [
+            "projectname",
+            "Agentic AI example"
+        ]
+    ],
+    "psi-header.templates": [
+        {
+            "language": "python",
+            "template": [
+                "File: <<filename>>",
+                "Project: <<projectname>>",
+                "Created: <<filecreated('dddd, Do MMMM YYYY h:mm:ss a')>>",
+                "Author: <<author>>",
+                "",
+                "MIT License"
+            ]
+        }
+    ]
+}
