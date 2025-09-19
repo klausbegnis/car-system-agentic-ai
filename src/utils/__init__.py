@@ -1,5 +1,11 @@
-"""Utilities module."""
+"""
+File: __init__.py
+Project: Agentic AI example
+Author: Klaus
 
-from .logger import get_logger, setup_logging
+MIT License
+"""
 
-__all__ = ["get_logger", "setup_logging"]
+from .logger import get_logger, setup_logging, suppress_google_warnings
+
+__all__ = ["get_logger", "setup_logging", "suppress_google_warnings"]
