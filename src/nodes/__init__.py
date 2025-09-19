@@ -6,8 +6,8 @@ Author: Klaus
 MIT License
 """
 
-from .reasoning_node import ReasoningNode
+from .node_with_tools import NodeWithTools
 from .output_guard_rail import OutputGuardRail
 from .input_guard_rail import InputGuardRail
 
-__all__ = ["ReasoningNode", "OutputGuardRail", "InputGuardRail"]
+__all__ = ["NodeWithTools", "OutputGuardRail", "InputGuardRail"]

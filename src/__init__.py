@@ -13,7 +13,7 @@ from . import utils as _utils
 
 # Import classes directly and create namespaces
 from .models.gemini import Gemini as GeminiModel
-from .nodes.reasoning_node import ReasoningNode
+from .nodes.node_with_tools import NodeWithTools
 from .data_models.graph_state import CarSystemState
 from .nodes.input_guard_rail import InputGuardRail
 from .nodes.output_guard_rail import OutputGuardRail
@@ -25,7 +25,7 @@ class models:
 
 
 class nodes:
-    ReasoningNode = ReasoningNode
+    NodeWithTools = NodeWithTools
     InputGuardRail = InputGuardRail
     OutputGuardRail = OutputGuardRail
 
