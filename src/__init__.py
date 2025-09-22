@@ -17,6 +17,7 @@ from .nodes.node_with_tools import NodeWithTools
 from .data_models.graph_state import CarSystemState
 from .nodes.input_guard_rail import InputGuardRail
 from .nodes.output_guard_rail import OutputGuardRail
+from .data_models.agent_card import AgentCard
 
 
 # Create namespace objects
@@ -33,6 +34,7 @@ class nodes:
 # State schema
 class schemas:
     CarSystemState = CarSystemState
+    AgentCard = AgentCard
 
 
 # Make modules available as namespaces

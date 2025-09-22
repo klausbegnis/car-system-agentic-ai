@@ -8,11 +8,12 @@ MIT License
 """
 
 from collections.abc import Iterator
-from typing import Any, Optional
+from typing import Any
 
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from src.data_models.agent_card import AgentCard
 from src.models.base._chat_model import ChatModel
 from src.utils.logger import get_logger
 
@@ -24,22 +25,32 @@ class Gemini(ChatModel):
     Gemini chat model.
     """
 
-    def __init__(self, model: str, prompt: str, temperature: float = 0.0):
+    def __init__(
+        self,
+        model: str,
+        prompt: str,
+        temperature: float = 0.0,
+        agent_card: AgentCard | None = None,
+    ):
         """
         Start the gemini chat model.
 
         Args:
             model (str): The model to use.
         """
-        super().__init__(model, prompt)
+        super().__init__(model, prompt, agent_card=agent_card)
         self.model = ChatGoogleGenerativeAI(
             model=model, temperature=temperature
         )
-        logger.info(f"🤖 GeminiModel: Initialized with model {model}")
+        if self.agent_card and self.agent_card.name:
+            logger.info(
+                f"🤖 GeminiModel: Initialized with model {model} "
+                f"[agent={self.agent_card.name}]"
+            )
+        else:
+            logger.info(f"🤖 GeminiModel: Initialized with model {model}")
 
-    def invoke(
-        self, messages: Optional[list[BaseMessage]] = None
-    ) -> BaseMessage:
+    def invoke(self, messages: list[BaseMessage] | None = None) -> BaseMessage:
         """
         Invoke the gemini chat model.
 
@@ -90,7 +101,7 @@ class Gemini(ChatModel):
         raise ValueError("Messages are required")
 
     def stream(
-        self, messages: Optional[list[BaseMessage]] = None
+        self, messages: list[BaseMessage] | None = None
     ) -> Iterator[Any]:
         """
         Stream the gemini chat model.
