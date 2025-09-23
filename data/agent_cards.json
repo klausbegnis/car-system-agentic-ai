@@ -1,0 +1,34 @@
+[
+  {
+    "name": "AgenteDiagnosticoCarro",
+    "description": "Agente especializado em diagnóstico e telemetria de carro.",
+    "version": "1.0.0",
+    "capabilities": { "streaming": false, "tools": true },
+    "skills": [
+      {
+        "id": "get_car_status",
+        "name": "Obter status do carro",
+        "description": "Buscar nível de combustível e autonomia atual do carro."
+      }
+    ],
+    "tags": ["carro", "diagnóstico", "telemetria"],
+    "extra": null
+  },
+  {
+    "name": "AgentePlanejadorViagem",
+    "description": "Agente especializado em planejamento de viagens e insights de destinos.",
+    "version": "1.0.0",
+    "capabilities": { "streaming": false, "tools": true },
+    "skills": [
+      {
+        "id": "recommend_locations",
+        "name": "Recomendar locais",
+        "description": "Sugerir destinos com coordenadas e condições climáticas."
+      }
+    ],
+    "tags": ["viagem", "planejamento", "destinos", "clima"],
+    "extra": null
+  }
+]
+
+

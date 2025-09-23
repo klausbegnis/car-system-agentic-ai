@@ -11,6 +11,7 @@ from collections.abc import Iterator
 from typing import Any
 
 from langchain_core.messages import BaseMessage, SystemMessage
+from langchain_core.tools import BaseTool
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from src.data_models.agent_card import AgentCard
@@ -31,6 +32,7 @@ class Gemini(ChatModel):
         prompt: str,
         temperature: float = 0.0,
         agent_card: AgentCard | None = None,
+        tools: list[BaseTool] | None = None,
     ):
         """
         Start the gemini chat model.
@@ -38,10 +40,20 @@ class Gemini(ChatModel):
         Args:
             model (str): The model to use.
         """
-        super().__init__(model, prompt, agent_card=agent_card)
+        super().__init__(model, prompt, agent_card=agent_card, tools=tools)
         self.model = ChatGoogleGenerativeAI(
             model=model, temperature=temperature
         )
+        # Ensure tools are bound on the backend if provided
+        if tools:
+            try:
+                self.set_tools(tools)
+                tool_names = [t.name for t in tools]
+                logger.info(
+                    f"🔗 Gemini: tools bound -> {tool_names}"
+                )
+            except Exception as e:
+                logger.warning(f"Gemini: failed to bind tools: {e}")
         if self.agent_card and self.agent_card.name:
             logger.info(
                 f"🤖 GeminiModel: Initialized with model {model} "

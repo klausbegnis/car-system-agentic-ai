@@ -21,4 +21,14 @@ def is_trip_possible(distance: float, autonomy: float, gas: float) -> bool:
         f"🔧 Checking if trip is possible: distance={distance}, "
         f"autonomy={autonomy}, gas={gas}"
     )
-    return distance / autonomy >= gas
+    try:
+        needed_gas = distance / autonomy
+        possible = needed_gas <= gas
+        logger.info(
+            f"🔧 Trip feasibility: needed_gas={needed_gas:.4f}, "
+            f"available_gas={gas:.4f}, possible={possible}"
+        )
+        return possible
+    except Exception as e:
+        logger.error(f"❌ is_trip_possible error: {e}")
+        raise
