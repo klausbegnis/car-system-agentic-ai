@@ -10,7 +10,7 @@ name = "car-system-agentic-ai"
 version = "0.1.0"
 description = "An agentic AI system for car management and automation"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 license = {text = "MIT"}
 authors = [
     {name = "Klaus", email = "kbegnis23@gmail.com"},
@@ -36,6 +36,8 @@ dependencies = [
     "langgraph>=0.6.7",
     "langchain-community>=0.3.29",
     "langchain-google-genai>=2.1.12",
+    "langgraph-cli>=0.4.2",
+    "langgraph-api>=0.4.27",
 ]
 
 [project.optional-dependencies]

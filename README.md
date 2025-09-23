@@ -26,50 +26,60 @@ The system uses a multi-agent architecture with specialized agents coordinated b
 
 ```mermaid
 flowchart LR
-  %% --- Main path (VISIBLE) ---
-  U[Usuario] --> IGR[Input Guard Rail]
-  IGR --> RN[Reasoning Agent]
-  RN --> OGR[Output Guard Rail]
-  OGR --> END[Resposta]
-
-  %% --- Agent calls (no labels) ---
-  RN --> CAR[Car Agent]
-  CAR --> RN
-  RN --> TRIP[Trip Planner Agent]
-  TRIP --> RN
-
-  %% --- Error route directly to Output Guard Rail ---
-  IGR -.-> OGR
-
-  %% --- Tools (allowed only) ---
-  subgraph RNT[Reasoning Tools]
+ subgraph RNT["Reasoning Tools"]
     direction TB
-    RN_T1[list_registered_agents]
-    RN_T2[is_trip_possible]
+        RN_T1["list_registered_agents()"]
+        RN_T2["is_trip_possible()"]
   end
-  RN -.-> RN_T1
-  RN -.-> RN_T2
-
-  subgraph CART[Car Agent Tools]
+ subgraph CART["Car Agent Tools"]
     direction TB
-    CAR_T1[get_car_status]
+        CAR_T1["get_car_status()"]
   end
-  CAR -.-> CAR_T1
-
-  subgraph TRIPT[Trip Planner Tools]
+ subgraph TRIPT["Trip Planner Tools"]
     direction TB
-    TRIP_T1[recommend_locations]
-    TRIP_T2[get_predicted_weather]
+        TRIP_T1["recommend_locations()"]
+        TRIP_T2["get_predicted_weather()"]
   end
-  TRIP -.-> TRIP_T1
-  TRIP -.-> TRIP_T2
+    IGR["Input Guard Rail"] L_IGR_RN_0@--> RN["Reasoning Agent"]
+    RN L_RN_OGR_0@--> OGR["Output Guard Rail"] & CAR["Car Agent"] & TRIP["Trip Planner Agent"]
+    CAR L_CAR_RN_0@--> RN
+    TRIP L_TRIP_RN_0@--> RN
+    IGR -.-> OGR
+    RN L_RN_RN_T1_0@-.-> RN_T1 & RN_T2
+    CAR L_CAR_CAR_T1_0@-.-> CAR_T1
+    TRIP L_TRIP_TRIP_T1_0@-.-> TRIP_T1 & TRIP_T2
+    n1["User message"] --> IGR
+    OGR --> n2["AI Response"]
 
-  %% ===== Styles =====
-  %% visible nodes (Usuario and Resposta)
-  classDef visibleNode fill:#ECFDF5,stroke:#16a34a,color:#065f46,stroke-width:2px;
-  class U,END visibleNode;
+    n1@{ shape: rect}
+    n2@{ shape: rect}
+    classDef visibleNode fill:#ECFDF5,stroke:#16a34a,color:#065f46,stroke-width:2px
+    linkStyle 0 stroke:#00C853,fill:none
+    linkStyle 1 stroke:#00C853,fill:none
+    linkStyle 2 stroke:#2962FF,fill:none
+    linkStyle 3 stroke:#2962FF,fill:none
+    linkStyle 4 stroke:#2962FF,fill:none
+    linkStyle 5 stroke:#2962FF,fill:none
+    linkStyle 6 stroke:#D50000,fill:none
+    linkStyle 7 stroke:#FF6D00,fill:none
+    linkStyle 8 stroke:#FF6D00,fill:none
+    linkStyle 9 stroke:#FF6D00,fill:none
+    linkStyle 10 stroke:#FF6D00,fill:none
+    linkStyle 11 stroke:#FF6D00,fill:none
+    linkStyle 12 stroke:#00C853,fill:none
+    linkStyle 13 stroke:#00C853
 
-  %% visible path (first four links in the diagram order above)
+    L_IGR_RN_0@{ animation: none } 
+    L_RN_OGR_0@{ animation: none } 
+    L_RN_CAR_0@{ animation: fast } 
+    L_RN_TRIP_0@{ animation: fast } 
+    L_CAR_RN_0@{ animation: fast } 
+    L_TRIP_RN_0@{ animation: fast } 
+    L_RN_RN_T1_0@{ animation: none } 
+    L_RN_RN_T2_0@{ animation: none } 
+    L_CAR_CAR_T1_0@{ animation: none } 
+    L_TRIP_TRIP_T1_0@{ animation: none } 
+    L_TRIP_TRIP_T2_0@{ animation: none } 
 ```
 
 ### Agent Components Overview
@@ -91,6 +101,7 @@ flowchart LR
 - **🐍 Python 3.12+**: Core programming language
 - **🦜 LangChain**: LLM framework and tool integration
 - **📊 LangGraph**: Multi-agent workflow orchestration
+- **🔍 LangSmith**: LLM observability and debugging
 - **🤖 Google Gemini**: Large language model (gemini-2.5-flash)
 - **📓 Jupyter**: Interactive development environment
 - **🔧 UV**: Fast Python package manager

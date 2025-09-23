@@ -27,6 +27,11 @@ Add the following variables to your `.env` file:
 ```bash
 # Google AI API Key (Required)
 GOOGLE_API_KEY=your_google_api_key_here
+
+# LangSmith Configuration (Optional - for observability)
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=your_langsmith_api_key_here
+LANGCHAIN_PROJECT=car-system-agentic-ai
 ```
 
 ## Variable Descriptions
@@ -45,3 +50,38 @@ GOOGLE_API_KEY=your_google_api_key_here
 3. Click "Get API Key" 
 4. Create a new API key or use an existing one
 5. Copy the key to your `.env` file
+
+### Optional Variables (LangSmith Observability)
+
+#### `LANGCHAIN_TRACING_V2`
+- **Purpose**: Enable LangSmith tracing for debugging and monitoring
+- **Required**: No (but recommended for development)
+- **Format**: Boolean (`true` or `false`)
+- **Default**: `false`
+- **Example**: `LANGCHAIN_TRACING_V2=true`
+
+#### `LANGCHAIN_API_KEY`
+- **Purpose**: Authentication for LangSmith platform
+- **Required**: Only if `LANGCHAIN_TRACING_V2=true`
+- **Format**: String (API key from LangSmith)
+- **Example**: `LANGCHAIN_API_KEY=ls__abc123def456ghi789jkl012mno345pqr678`
+
+#### `LANGCHAIN_PROJECT`
+- **Purpose**: Project name for organizing traces in LangSmith
+- **Required**: No
+- **Format**: String (project identifier)
+- **Default**: `default`
+- **Example**: `LANGCHAIN_PROJECT=car-system-agentic-ai`
+
+**How to get your LangSmith API key:**
+1. Go to [LangSmith](https://smith.langchain.com/)
+2. Sign up or sign in to your account
+3. Navigate to Settings → API Keys
+4. Create a new API key
+5. Copy the key to your `.env` file
+
+**Benefits of LangSmith integration:**
+- 🔍 **Trace Debugging**: See detailed execution flows of your agents
+- 📊 **Performance Monitoring**: Track token usage and response times
+- 🐛 **Error Analysis**: Identify and debug issues in agent interactions
+- 📈 **Usage Analytics**: Monitor system performance over time
