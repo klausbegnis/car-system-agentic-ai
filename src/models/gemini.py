@@ -40,10 +40,15 @@ class Gemini(ChatModel):
         Args:
             model (str): The model to use.
         """
-        super().__init__(model, prompt, agent_card=agent_card, tools=tools)
-        self.model = ChatGoogleGenerativeAI(
+        # Initialize the actual ChatGoogleGenerativeAI model first
+        gemini_model = ChatGoogleGenerativeAI(
             model=model, temperature=temperature
         )
+
+        # Call super().__init__ with the actual model instance
+        super().__init__(model, prompt, agent_card=agent_card, tools=tools)
+        self.model = gemini_model
+        self._original_model = gemini_model  # Store original reference
         # Ensure tools are bound on the backend if provided
         if tools:
             try:

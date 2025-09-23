@@ -34,6 +34,7 @@ class ChatModel(ABC):
         self.agent_card: AgentCard | None = agent_card
         self.tools: list[BaseTool] = tools or []
         self._logger = get_logger(__name__)
+        self._original_model = None  # Keep reference to original model
         if self.tools:
             self.set_tools(self.tools)
 
@@ -55,13 +56,35 @@ class ChatModel(ABC):
         """
         Set the structured output schema.
         """
-        self.model = self.model.with_structured_output(schema, include_raw=True)
+        # Use original model if available, otherwise current model
+        base_model = (
+            self._original_model if self._original_model else self.model
+        )
+
+        # Apply structured output first
+        structured_model = base_model.with_structured_output(
+            schema, include_raw=True
+        )
+
+        # Then apply tools if we have them
+        if self.tools:
+            try:
+                self.model = structured_model.bind_tools(self.tools)
+            except Exception:
+                self.model = structured_model
+        else:
+            self.model = structured_model
 
     def set_tools(self, tools: list[BaseTool] | None):
         """
         Bind tools to the underlying model, mirroring structured output binding.
         """
         self.tools = tools or []
+
+        # Store original model reference if not already stored
+        if self._original_model is None:
+            self._original_model = self.model
+
         if hasattr(self.model, "bind_tools") and self.tools:
             from contextlib import suppress
 
