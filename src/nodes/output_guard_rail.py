@@ -162,28 +162,9 @@ class OutputGuardRail(Node):
 
         try:
             # Get the original user message
-            messages = state.get("messages", [])
-            original_message = ""
-            if messages:
-                original_message = messages[-1].content
-
-            # Prepare content for safety check and formatting
             recommendation_text = recommendations[0] if recommendations else ""
-
-            safety_check_prompt = (
-                f"Analise esta recomendação sobre problemas automotivos e "
-                f"verifique se há alguma informação perigosa, incorreta ou "
-                f"que possa causar danos. Se houver problemas de segurança, "
-                f"reformule a resposta de forma segura. Se estiver tudo bem, "
-                f"formate a resposta de forma clara e amigável para o "
-                f"usuário.\n\n"
-                f"Pergunta original: {original_message}\n"
-                f"Recomendação: {recommendation_text}\n\n"
-                f"Responda diretamente ao usuário com a recomendação "
-                f"(reformulada se necessário)."
-            )
-
-            messages_for_model = [HumanMessage(content=safety_check_prompt)]
+            # human message since gemini requires at least one human message
+            messages_for_model = [HumanMessage(content=recommendation_text)]
             response = self.model.invoke(messages=messages_for_model)
 
             # Extract final message

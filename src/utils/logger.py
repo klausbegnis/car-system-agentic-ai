@@ -195,19 +195,9 @@ def _suppress_grpc_warnings() -> None:
     warnings.filterwarnings("ignore", message=".*Not running on GCP.*")
     warnings.filterwarnings("ignore", message=".*absl::InitializeLog.*")
 
-    # Try to configure absl logging if available
-    try:
-        import absl.logging
-
-        absl.logging.set_verbosity(absl.logging.FATAL)
-        absl.logging.set_stderrthreshold(absl.logging.FATAL)
-    except ImportError:
-        pass
-
     # Try to redirect stderr temporarily for gRPC initialization
     try:
         import contextlib
-        import io
         import sys
 
         # Create a context manager to suppress stderr during imports

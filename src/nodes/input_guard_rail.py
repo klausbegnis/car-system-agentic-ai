@@ -58,8 +58,9 @@ class InputGuardRail(Node):
 
         logger.info(f"📨 Processing message: {user_message.content[:100]}...")
         # Use the model to validate the input
-        self.model.set_structured_output(InputGuardRailOutput)
-        response = self.model.invoke(messages=[user_message])
+        response = self.model.invoke_with_structured_output(
+            InputGuardRailOutput, messages=[user_message]
+        )
 
         # With include_raw=True, response is a dict with 'parsed' and 'raw' keys
         if isinstance(response, dict):

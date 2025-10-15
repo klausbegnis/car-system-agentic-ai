@@ -63,3 +63,5 @@ Sua resposta deve ser direta ao usuário, como se você fosse o especialista res
 - Seja claro sobre quando procurar ajuda profissional  
 - Use linguagem que qualquer pessoa possa entender
 - Mantenha o foco em soluções práticas e seguras
+
+[RESPOSTA DESENVOLVIDA]

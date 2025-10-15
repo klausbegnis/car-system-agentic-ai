@@ -8,11 +8,13 @@ MIT License
 """
 
 from collections.abc import Iterator
+from contextlib import suppress
 from typing import Any
 
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_core.tools import BaseTool
 from langchain_google_genai import ChatGoogleGenerativeAI
+from pydantic import BaseModel
 
 from src.data_models.agent_card import AgentCard
 from src.models.base._chat_model import ChatModel
@@ -44,19 +46,16 @@ class Gemini(ChatModel):
         gemini_model = ChatGoogleGenerativeAI(
             model=model, temperature=temperature
         )
+        self.model = gemini_model
 
         # Call super().__init__ with the actual model instance
-        super().__init__(model, prompt, agent_card=agent_card, tools=tools)
-        self.model = gemini_model
-        self._original_model = gemini_model  # Store original reference
+        super().__init__(prompt, agent_card=agent_card, tools=tools)
         # Ensure tools are bound on the backend if provided
         if tools:
             try:
                 self.set_tools(tools)
                 tool_names = [t.name for t in tools]
-                logger.info(
-                    f"🔗 Gemini: tools bound -> {tool_names}"
-                )
+                logger.info(f"🔗 Gemini: tools bound -> {tool_names}")
             except Exception as e:
                 logger.warning(f"Gemini: failed to bind tools: {e}")
         if self.agent_card and self.agent_card.name:
@@ -144,3 +143,25 @@ class Gemini(ChatModel):
                 full_messages = messages
             return self.model.stream(full_messages)
         raise ValueError("Messages are required")
+
+    def set_tools(self, tools: list[BaseTool] | None):
+        """
+        Bind tools to the underlying model, mirroring structured output binding.
+        """
+        self.tools = tools or []
+
+        if hasattr(self.model, "bind_tools") and self.tools:
+            with suppress(Exception):
+                self.model = self.model.bind_tools(self.tools)
+
+    def invoke_with_structured_output(
+        self, schema: BaseModel, messages: list[BaseMessage] | None = None
+    ) -> BaseModel:
+        """
+        Invoke the chat model with structured output.
+        """
+        structured_model = self.model.with_structured_output(
+            schema, include_raw=True
+        )
+        messages_for_api = [SystemMessage(content=self.prompt), *messages]
+        return structured_model.invoke(messages_for_api)

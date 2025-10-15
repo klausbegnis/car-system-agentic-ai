@@ -24,17 +24,14 @@ class ChatModel(ABC):
 
     def __init__(
         self,
-        model: str,
         prompt: str,
         agent_card: AgentCard | None = None,
         tools: list[BaseTool] | None = None,
     ):
-        self.model = model
         self.prompt = prompt
         self.agent_card: AgentCard | None = agent_card
         self.tools: list[BaseTool] = tools or []
         self._logger = get_logger(__name__)
-        self._original_model = None  # Keep reference to original model
         if self.tools:
             self.set_tools(self.tools)
 
@@ -52,44 +49,19 @@ class ChatModel(ABC):
         """
         pass
 
-    def set_structured_output(self, schema: BaseModel):
+    @abstractmethod
+    def invoke_with_structured_output(self, schema: BaseModel):
         """
         Set the structured output schema.
         """
-        # Use original model if available, otherwise current model
-        base_model = (
-            self._original_model if self._original_model else self.model
-        )
+        pass
 
-        # Apply structured output first
-        structured_model = base_model.with_structured_output(
-            schema, include_raw=True
-        )
-
-        # Then apply tools if we have them
-        if self.tools:
-            try:
-                self.model = structured_model.bind_tools(self.tools)
-            except Exception:
-                self.model = structured_model
-        else:
-            self.model = structured_model
-
+    @abstractmethod
     def set_tools(self, tools: list[BaseTool] | None):
         """
         Bind tools to the underlying model, mirroring structured output binding.
         """
-        self.tools = tools or []
-
-        # Store original model reference if not already stored
-        if self._original_model is None:
-            self._original_model = self.model
-
-        if hasattr(self.model, "bind_tools") and self.tools:
-            from contextlib import suppress
-
-            with suppress(Exception):
-                self.model = self.model.bind_tools(self.tools)
+        pass
 
     def invoke_with_tools(
         self, messages: list[BaseMessage], max_tool_iters: int = 5
@@ -110,7 +82,7 @@ class ChatModel(ABC):
             messages.append(resp)
 
             if not tool_map:
-                return messages, None
+                return messages, None, None
 
             for _ in range(max_tool_iters):
                 tool_calls = getattr(resp, "tool_calls", None)
