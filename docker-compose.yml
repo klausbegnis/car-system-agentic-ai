@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  car-system-ai:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8083:8083"
+    environment:
+      - PYTHONPATH=/app
+      - PORT=8083
+    volumes:
+      - .:/app
+    restart: unless-stopped
+    networks:
+      - car-system-network
+networks:
+  car-system-network:
+    driver: bridge
+

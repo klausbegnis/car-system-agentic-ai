@@ -59,34 +59,6 @@ def load_prompt_from_markdown(
         ) from e
 
 
-def list_available_prompts(prompts_dir: Optional[str] = None) -> list[str]:
-    """
-    List all available prompt files in the prompts directory.
-
-    Args:
-        prompts_dir: Optional custom prompts directory path
-
-    Returns:
-        list[str]: List of prompt names (without .md extension)
-    """
-    # Default to src/prompts directory
-    if prompts_dir is None:
-        current_dir = Path(__file__).parent
-        prompts_dir = current_dir.parent / "prompts"
-    else:
-        prompts_dir = Path(prompts_dir)
-
-    if not prompts_dir.exists():
-        return []
-
-    # Find all .md files and return their names without extension
-    prompt_files = []
-    for file in prompts_dir.glob("*.md"):
-        prompt_files.append(file.stem)
-
-    return sorted(prompt_files)
-
-
 def validate_prompt_content(content: str) -> bool:
     """
     Validate that prompt content is not empty and contains meaningful text.

@@ -12,6 +12,7 @@ from langchain_core.runnables import RunnableConfig
 
 from src.models.base._chat_model import ChatModel
 from src.utils.logger import get_logger
+from src.utils.stream import stream_if_available
 
 from ._node import Node
 
@@ -56,23 +57,31 @@ class NodeWithTools(Node):
         return None
 
     def run_model_with_optional_tools(
-        self, messages: list
+        self, messages: list, config: RunnableConfig | None = None
     ) -> tuple[list, str | None]:
         """Delegate to model.invoke_with_tools with unified behavior."""
         try:
+            # Get stream_callback from state
+            stream_callback = None
+            if hasattr(self, "_current_state"):
+                stream_callback = self._current_state.get("stream_callback")
+            stream_if_available(
+                stream_callback,
+                "Executando análise com ferramentas...",
+                type="reasoning",
+            )
+
             typed_messages: list[BaseMessage] = messages
             messages, _final_text, error = self.model.invoke_with_tools(
-                typed_messages, max_tool_iters=5
+                typed_messages, config=config
             )
             # Keep signature compatibility: propagate error only
             return messages, error
         except Exception as e:
-            logger.error(f"❌ Error running model with tools: {e}")
+            logger.error(f"Error running model with tools: {e}")
             return messages, f"Error during model execution: {e!s}"
 
     # Make execute abstract again; concrete nodes must implement it
-    def execute(
-        self, state: dict, config: RunnableConfig, *args, **kwargs
-    ):
+    def execute(self, state: dict, config: RunnableConfig, *args, **kwargs):
         """Abstract execute method for concrete nodes to implement."""
         raise NotImplementedError

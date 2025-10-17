@@ -183,7 +183,8 @@ def _suppress_grpc_warnings() -> None:
     import os
     import warnings
 
-    # Set environment variables to suppress gRPC verbosity (must be set before import)
+    # Set environment variables to suppress gRPC verbosity
+    # (must be set before import)
     os.environ["GRPC_VERBOSITY"] = "ERROR"
     os.environ["GLOG_MINLOGLEVEL"] = "3"  # 3 = FATAL only
     os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -219,18 +220,33 @@ def _suppress_grpc_warnings() -> None:
 
 
 def setup_logging(
-    level: str = "INFO",
+    level: str | None = None,
     log_file: Optional[str] = None,
     use_colors: bool = True,
 ) -> None:
     """
     Setup centralized logging configuration with colors.
 
+    The log level is determined in the following order:
+    1. PYTHONLOG environment variable
+    2. LOG_LEVEL environment variable
+    3. level parameter passed to this function
+    4. Default to "INFO"
+
     Args:
         level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_file: Optional file path to write logs to
         use_colors: Whether to use colored output (default: True)
     """
+    # Determine log level from environment or parameter
+    env_level = os.getenv("PYTHONLOG") or os.getenv("LOG_LEVEL")
+    final_level = (env_level or level or "INFO").upper()
+
+    # Validate log level
+    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    if final_level not in valid_levels:
+        print(f"Invalid log level '{final_level}', defaulting to INFO")
+        final_level = "INFO"
     # Remove all existing handlers
     root_logger = logging.getLogger()
     for handler in root_logger.handlers[:]:
@@ -250,10 +266,10 @@ def setup_logging(
         )
 
     console_handler.setFormatter(console_formatter)
-    console_handler.setLevel(getattr(logging, level.upper()))
+    console_handler.setLevel(getattr(logging, final_level))
 
     # Configure root logger
-    root_logger.setLevel(getattr(logging, level.upper()))
+    root_logger.setLevel(getattr(logging, final_level))
     root_logger.addHandler(console_handler)
 
     # Add file handler if specified (always without colors)
@@ -267,8 +283,11 @@ def setup_logging(
             datefmt="%Y-%m-%d %H:%M:%S",
         )
         file_handler.setFormatter(file_formatter)
-        file_handler.setLevel(getattr(logging, level.upper()))
+        file_handler.setLevel(getattr(logging, final_level))
         root_logger.addHandler(file_handler)
+
+    # Log the selected level
+    root_logger.debug(f"Logging initialized with level: {final_level}")
 
     # Set specific loggers to appropriate levels to reduce noise
     for logger_name in [

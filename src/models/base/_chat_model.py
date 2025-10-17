@@ -8,13 +8,18 @@ MIT License
 """
 
 from abc import ABC, abstractmethod
+import os
 
 from langchain_core.messages import BaseMessage, ToolMessage
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel
 
 from src.data_models.agent_card import AgentCard
 from src.utils.logger import get_logger
+from src.utils.stream import stream_if_available
+
+logger = get_logger(__name__)
 
 
 class ChatModel(ABC):
@@ -31,7 +36,6 @@ class ChatModel(ABC):
         self.prompt = prompt
         self.agent_card: AgentCard | None = agent_card
         self.tools: list[BaseTool] = tools or []
-        self._logger = get_logger(__name__)
         if self.tools:
             self.set_tools(self.tools)
 
@@ -64,12 +68,19 @@ class ChatModel(ABC):
         pass
 
     def invoke_with_tools(
-        self, messages: list[BaseMessage], max_tool_iters: int = 5
+        self,
+        messages: list[BaseMessage],
+        max_tool_iters: int | None = None,
+        config: RunnableConfig | None = None,
     ) -> tuple[list[BaseMessage], str | None, str | None]:
         """
         Invoke once and iteratively fulfill tool calls if present.
         Returns updated messages and optional error message.
         """
+        # Get max_tool_iters from environment variable or use default
+        if max_tool_iters is None:
+            max_tool_iters = int(os.getenv("MAX_TOOL_ITERS", "10"))
+
         try:
             # Build tool map once
             try:
@@ -98,9 +109,7 @@ class ChatModel(ABC):
                     ]
                 except Exception:
                     tool_names = []
-                self._logger.info(
-                    "🧰 invoke_with_tools: tool_calls=%r", tool_names
-                )
+                logger.debug("invoke_with_tools: tool_calls=%r", tool_names)
                 for call in tool_calls:
                     name = getattr(call, "name", None) or call.get("name", "")
                     args = (
@@ -113,8 +122,8 @@ class ChatModel(ABC):
                     )
                     tool = tool_map.get(name)
                     if not tool:
-                        self._logger.warning(
-                            f"🧰 invoke_with_tools: tool not found: {name}"
+                        logger.warning(
+                            f"invoke_with_tools: tool not found: {name}"
                         )
                         messages.append(
                             ToolMessage(
@@ -125,7 +134,13 @@ class ChatModel(ABC):
                         )
                         continue
                     try:
-                        result = tool.invoke(args)
+                        config = args.get("config", {})
+                        stream_if_available(
+                            config.get("stream_callback"),
+                            f"Invocando ferramenta: {name}...",
+                            type="reasoning",
+                        )
+                        result = tool.invoke(input=args, config=config)
 
                         messages.append(
                             ToolMessage(
@@ -135,13 +150,15 @@ class ChatModel(ABC):
                             )
                         )
                     except Exception as e:
+                        error_msg = f"Tool '{name}' execution error: {e!s}"
+                        logger.error(error_msg)
                         messages.append(
                             ToolMessage(
                                 name=name or "",
                                 tool_call_id=call_id,
-                                content=f"Tool '{name}' execution error: {e!s}",
+                                content=error_msg,
                             )
-                            )
+                        )
                 # Re-invoke after tools
                 resp = self.invoke(messages)
                 messages.append(resp)

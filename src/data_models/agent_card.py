@@ -41,9 +41,7 @@ class AgentCard(BaseModel):
     """Metadata describing a remote agent (A2A-style)."""
 
     name: str = Field(..., description="Agent name")
-    description: str | None = Field(
-        default=None, description="Agent purpose"
-    )
+    description: str | None = Field(default=None, description="Agent purpose")
     version: str | None = Field(default=None, description="Version string")
     url: HttpUrl | None = Field(
         default=None, description="Public base URL of the agent if available"

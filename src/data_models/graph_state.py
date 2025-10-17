@@ -7,7 +7,7 @@ Author: Klaus
 MIT License
 """
 
-from typing import Optional, TypedDict
+from typing import Annotated, Any, Optional, TypedDict
 
 from langchain_core.messages import BaseMessage
 
@@ -15,12 +15,7 @@ from langchain_core.messages import BaseMessage
 class CarSystemState(TypedDict):
     """State schema for the car system agentic AI workflow"""
 
-    # Messages to track conversation flow
-    messages: list[BaseMessage]
-    # User input and context
-    user_input: Optional[str]
-    # Car-related data
-    car_data: Optional[dict]
+    messages: Annotated[list[BaseMessage], "append"]
     # Processing status
     processing_status: Optional[str]
     # Results and outputs
@@ -28,5 +23,5 @@ class CarSystemState(TypedDict):
     recommendations: Optional[list[str]]
     # Error handling
     error_message: Optional[str]
-    # Additional context that might be needed
-    context: Optional[dict]
+    # Stream callback for real-time updates
+    stream_callback: Optional[Any]

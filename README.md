@@ -162,11 +162,34 @@ This proof-of-concept can be extended with production-ready features:
   - Integration with travel booking platforms
 
 
+## 🐳 Docker
+
+### Quick Start
+
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
+
+# Access the application
+curl http://localhost:8083/health
+```
+
+### Manual Docker Build
+
+```bash
+# Build the image
+docker build -f docker/Dockerfile -t car-system-ai .
+
+# Run the container
+docker run -p 8083:8083 car-system-ai
+```
+
 ## 📚 Documentation
 
 - [Installation Guide](docs/installation-guide.md) - Complete setup instructions with UV or pip
 - [Environment Variables](docs/environment-variables.md) - Configuration and API key setup
 - [Using Notebooks](docs/using-notebooks.md) - Guide for working with Jupyter notebooks
+- [API Documentation](docs/api-documentation.md) - Complete API reference and examples
 
 ## 📝 License
 

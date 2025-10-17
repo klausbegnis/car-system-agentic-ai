@@ -296,6 +296,7 @@ name = "car-system-agentic-ai"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "fastapi" },
     { name = "httpx" },
     { name = "langchain" },
     { name = "langchain-community" },
@@ -361,6 +362,7 @@ dev = [
 requires-dist = [
     { name = "anthropic", marker = "extra == 'ai'", specifier = ">=0.3.0" },
     { name = "car-system-agentic-ai", extras = ["dev", "ai", "web"], marker = "extra == 'all'" },
+    { name = "fastapi", specifier = ">=0.116.2" },
     { name = "fastapi", marker = "extra == 'web'", specifier = ">=0.104.0" },
     { name = "httpx", specifier = ">=0.25.0" },
     { name = "ipykernel", marker = "extra == 'dev'", specifier = ">=6.0.0" },

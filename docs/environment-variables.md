@@ -32,6 +32,9 @@ GOOGLE_API_KEY=your_google_api_key_here
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_API_KEY=your_langsmith_api_key_here
 LANGCHAIN_PROJECT=car-system-agentic-ai
+
+# Tool Configuration (Optional)
+MAX_TOOL_ITERS=10
 ```
 
 ## Variable Descriptions
@@ -85,3 +88,15 @@ LANGCHAIN_PROJECT=car-system-agentic-ai
 - 📊 **Performance Monitoring**: Track token usage and response times
 - 🐛 **Error Analysis**: Identify and debug issues in agent interactions
 - 📈 **Usage Analytics**: Monitor system performance over time
+
+### Optional Variables (Tool Configuration)
+
+#### `MAX_TOOL_ITERS`
+- **Purpose**: Maximum number of tool iterations allowed per agent call
+- **Required**: No
+- **Format**: Integer
+- **Default**: `10`
+- **Example**: `MAX_TOOL_ITERS=15`
+
+**Description:**
+Controls how many times the AI agent can call tools in sequence before stopping. Higher values allow for more complex reasoning chains but may increase response time and costs.

@@ -10,12 +10,15 @@ from __future__ import annotations
 
 from threading import RLock
 from typing import ClassVar
+import unicodedata
 
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 from src.data_models.agent_card import AgentCard
 from src.models.base._chat_model import ChatModel
 from src.utils.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class AgentRegistry:
@@ -28,8 +31,6 @@ class AgentRegistry:
     @staticmethod
     def _normalize(name: str) -> str:
         try:
-            import unicodedata
-
             s = unicodedata.normalize("NFKD", name)
             s = "".join(c for c in s if not unicodedata.combining(c))
         except Exception:
@@ -70,14 +71,9 @@ class AgentRegistry:
             # Deduplicate by canonical card.name (defensive)
             unique: dict[str, AgentCard] = {}
             for card in cls._name_to_card.values():
-                unique[card.name] = card
+                if card and hasattr(card, "name"):
+                    unique[card.name] = card
             return list(unique.values())
-
-    @classmethod
-    def list_agents(cls) -> list[str]:
-        """Return a list of agent names registered."""
-        with cls._lock:
-            return list(cls._name_to_card.keys())
 
     @classmethod
     def clear(cls) -> None:
@@ -95,7 +91,7 @@ class AgentRegistry:
         empty content with only tool calls.
         """
         logger = get_logger(__name__)
-        logger.info(
+        logger.debug(
             "🧩 AgentRegistry.invoke: agent=%r, query[:120]=%r",
             agent_name,
             query[:120],
@@ -111,20 +107,18 @@ class AgentRegistry:
 
         # Use centralized tool loop on the delegated model
         messages = [HumanMessage(content=query)]
-        messages, final_text, error = model.invoke_with_tools(
-            messages, max_tool_iters=5
-        )
+        messages, final_text, error = model.invoke_with_tools(messages)
         if error:
             logger.warning("🧩 AgentRegistry.invoke: %s", error)
         # If no final_text provided, fallback to scan
         if not final_text:
-            from langchain_core.messages import AIMessage
-
             for msg in reversed(messages):
                 if isinstance(msg, AIMessage):
                     final_text = getattr(msg, "content", "")
                     break
-        logger.info("🧩 AgentRegistry.invoke: resposta len=%d", len(final_text))
+        logger.debug(
+            "🧩 AgentRegistry.invoke: resposta len=%d", len(final_text)
+        )
         logger.debug(
             "🧩 AgentRegistry.invoke: resposta_preview=%r", final_text[:160]
         )

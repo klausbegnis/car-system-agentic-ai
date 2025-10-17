@@ -15,6 +15,7 @@ from src.data_models.structured_outputs import InputGuardRailOutput
 from src.models.base._chat_model import ChatModel
 from src.nodes.base._node import Node
 from src.utils.logger import get_logger
+from src.utils.stream import stream_if_available
 
 logger = get_logger(__name__)
 
@@ -41,14 +42,20 @@ class InputGuardRail(Node):
         """
         Execute the input guard rail check.
         """
-        logger.info("🛡️ InputGuardRail: Starting execution")
+        logger.info("InputGuardRail: Starting execution")
 
         # Implement validation logic here
         messages = state.get("messages", [])
+        stream_callback = state.get("stream_callback")
+        stream_if_available(
+            stream_callback,
+            "Validando pergunta...",
+            type="reasoning",
+        )
 
         user_message = messages[-1] if messages else None
         if not (user_message):
-            logger.warning("❌ No user message found in state")
+            logger.warning("No user message found in state")
             return Command(
                 update={
                     "error_message": "No user message found.",
@@ -56,7 +63,7 @@ class InputGuardRail(Node):
                 goto=self.routing_options["end"],  # Route to error handling
             )
 
-        logger.info(f"📨 Processing message: {user_message.content[:100]}...")
+        logger.debug(f"Processing message: {user_message.content[:100]}...")
         # Use the model to validate the input
         response = self.model.invoke_with_structured_output(
             InputGuardRailOutput, messages=[user_message]
@@ -69,13 +76,13 @@ class InputGuardRail(Node):
             # Fallback for unexpected format
             output = response
         if isinstance(output, InputGuardRailOutput):
-            logger.info(f"✅ Validation result: is_valid={output.is_valid}")
+            logger.info(f"Validation result: is_valid={output.is_valid}")
             if output.error_message:
-                logger.info(f"⚠️ Error message: {output.error_message}")
+                logger.debug(f"Error message: {output.error_message}")
 
             if output.is_valid:
                 next_node = self.routing_options.get("next_node")
-                logger.info(f"🚀 Routing to next_node: {next_node}")
+                logger.debug(f"Routing to next_node: {next_node}")
                 return Command(
                     update={
                         "processing_status": "input_validated",
@@ -87,7 +94,7 @@ class InputGuardRail(Node):
                 )
             else:
                 logger.info(
-                    f"❌ Routing to end: {self.routing_options.get('end')}"
+                    f"Routing to end: {self.routing_options.get('end')}"
                 )
                 return Command(
                     update={
@@ -96,7 +103,7 @@ class InputGuardRail(Node):
                     goto=self.routing_options["end"],  # Route to error handling
                 )
 
-        logger.error(f"❌ Invalid output type: {type(output)}")
+        logger.error(f"Invalid output type: {type(output)}")
         return Command(
             update={
                 "error_message": "Invalid output from validation model.",

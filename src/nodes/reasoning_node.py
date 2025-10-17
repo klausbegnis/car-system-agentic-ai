@@ -12,6 +12,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.types import Command
 
 from src.utils.logger import get_logger
+from src.utils.stream import stream_if_available
 
 from .base._node_with_tools import NodeWithTools
 
@@ -25,11 +26,18 @@ class ReasoningNode(NodeWithTools):
         self, state: dict, config: RunnableConfig, *args, **kwargs
     ) -> Command:
         """Run reasoning, invoking tools only if requested by the model."""
-        logger.info("🧠 ReasoningNode: Starting execution")
+        logger.info("ReasoningNode: Starting execution")
+
+        stream_callback = state.get("stream_callback")
+        stream_if_available(
+            stream_callback,
+            "Realizando análise...",
+            type="reasoning",
+        )
 
         messages = state.get("messages", [])
         if not messages:
-            logger.warning("❌ No messages found in state")
+            logger.warning("No messages found in state")
             return Command(
                 update={"error_message": "No messages found in state."},
                 goto=self.routing_options.get("end", "END"),
@@ -37,7 +45,7 @@ class ReasoningNode(NodeWithTools):
 
         last_human_message = self._get_last_human_message(messages)
         if not last_human_message:
-            logger.warning("❌ No human message found in conversation")
+            logger.warning("No human message found in conversation")
             return Command(
                 update={
                     "error_message": "No human message found in conversation.",
@@ -46,10 +54,19 @@ class ReasoningNode(NodeWithTools):
             )
 
         logger.info(
-            f"📨 Processing message: {last_human_message.content[:100]}..."
+            f"Processing message: {last_human_message.content[:100]}..."
         )
 
-        messages, error = self.run_model_with_optional_tools(messages)
+        stream_if_available(
+            config.get("stream_callback"),
+            "Listando agentes disponíveis...",
+            type="reasoning",
+        )
+
+        # Store stream_callback in the node for use in
+        # run_model_with_optional_tools
+        self._current_state = state
+        messages, error = self.run_model_with_optional_tools(messages, config)
         if error:
             return Command(
                 update={"messages": messages, "error_message": error},
@@ -63,12 +80,10 @@ class ReasoningNode(NodeWithTools):
                 final_ai = msg
                 break
 
-        final_text = (
-            final_ai.content if isinstance(final_ai, AIMessage) else ""
-        )
+        final_text = final_ai.content if isinstance(final_ai, AIMessage) else ""
 
-        next_node = self.routing_options.get('next_node')
-        logger.info(f"🚀 Routing to next_node: {next_node}")
+        next_node = self.routing_options.get("next_node")
+        logger.info(f"Routing to next_node: {next_node}")
         return Command(
             update={
                 "messages": messages,
